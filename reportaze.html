@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reportáže — Dynamo Deník</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Source+Serif+4:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <div class="brand">
+      <span><strong>Dynamo</strong> Deník</span>
+      <small>neoficiální fanouškovský web</small>
+    </div>
+    <nav class="mainnav">
+      <a href="index.html">Domů</a>
+      <a href="reportaze.html">Reportáže</a>
+      <a href="tabulka.html">Tabulka</a>
+      <a href="archiv.html">Archiv</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="hero" style="padding-left:0;padding-right:0;border-bottom:none;">
+    <p class="eyebrow">Zápas po zápase</p>
+    <h1 style="font-size:clamp(1.8rem,4vw,2.6rem);">Reportáže</h1>
+  </div>
+
+  <div id="report-detail" style="display:none;"></div>
+
+  <div id="report-list">
+    <div class="section-head"><h2>Aktuální sezóna</h2></div>
+    <div id="cards" class="card-grid"><div class="empty">Načítám…</div></div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p class="disclaimer">Dynamo Deník je neoficiální fanouškovský projekt a nemá žádnou vazbu na vedení klubu SK Dynamo České Budějovice.</p>
+  </div>
+</footer>
+
+<script src="assets/site.js"></script>
+<script>
+(async function () {
+  const reports = await loadJSON("reports.json") || [];
+  const params = new URLSearchParams(location.search);
+  const id = params.get("id");
+
+  if (id) {
+    const r = reports.find(x => x.id === id);
+    document.getElementById("report-list").style.display = "none";
+    const detail = document.getElementById("report-detail");
+    detail.style.display = "block";
+    if (!r) {
+      detail.innerHTML = `<div class="empty">Reportáž nenalezena. <a href="reportaze.html">← Zpět na výpis</a></div>`;
+      return;
+    }
+    const paras = (r.body || []).map(p => `<p>${escapeHTML(p)}</p>`).join("");
+    detail.innerHTML = `
+      <p style="margin-top:24px;"><a href="reportaze.html">← Všechny reportáže</a></p>
+      ${protocolHTML(r)}
+      <article class="report-article">
+        <div class="body">${paras || `<p>${escapeHTML(r.perex || "")}</p>`}</div>
+      </article>`;
+  } else {
+    const cardsEl = document.getElementById("cards");
+    if (reports.length) {
+      const sorted = [...reports].sort((a, b) => new Date(b.date) - new Date(a.date));
+      cardsEl.innerHTML = sorted.map(reportCardHTML).join("");
+    } else {
+      cardsEl.innerHTML = `<div class="empty">Zatím žádná reportáž — přidej ji přes admin.html.</div>`;
+    }
+  }
+})();
+</script>
+</body>
+</html>

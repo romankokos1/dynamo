@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tabulka — Dynamo Deník</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Source+Serif+4:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <div class="brand">
+      <span><strong>Dynamo</strong> Deník</span>
+      <small>neoficiální fanouškovský web</small>
+    </div>
+    <nav class="mainnav">
+      <a href="index.html">Domů</a>
+      <a href="reportaze.html">Reportáže</a>
+      <a href="tabulka.html">Tabulka</a>
+      <a href="archiv.html">Archiv</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="hero" style="padding-left:0;padding-right:0;border-bottom:none;">
+    <p class="eyebrow" id="competition-name">Soutěž</p>
+    <h1 style="font-size:clamp(1.8rem,4vw,2.6rem);">Tabulka</h1>
+  </div>
+  <div id="table-wrap"><div class="empty">Načítám…</div></div>
+  <p id="updated" style="font-family:var(--f-mono); font-size:.75rem; color:var(--paper-dim); margin-top:14px;"></p>
+</div>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p class="disclaimer">Dynamo Deník je neoficiální fanouškovský projekt a nemá žádnou vazbu na vedení klubu SK Dynamo České Budějovice.</p>
+  </div>
+</footer>
+
+<script src="assets/site.js"></script>
+<script>
+(async function () {
+  const t = await loadJSON("table.json");
+  const wrap = document.getElementById("table-wrap");
+  if (!t) {
+    wrap.innerHTML = `<div class="empty">Tabulka se nepodařila načíst.</div>`;
+    return;
+  }
+  document.getElementById("competition-name").textContent = t.competition || "Soutěž";
+  wrap.innerHTML = tableHTML(t.rows, t.clubName);
+  if (t.updated) {
+    document.getElementById("updated").textContent = "Aktualizováno: " + fmtDate(t.updated);
+  }
+})();
+</script>
+</body>
+</html>

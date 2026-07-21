@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dynamo Deník — neoficiální fanouškovský web SK Dynamo České Budějovice</title>
+<meta name="description" content="Reportáže, ohlasy a tabulka SK Dynamo České Budějovice. Neoficiální fanouškovský projekt.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Source+Serif+4:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <div class="brand">
+      <span><strong>Dynamo</strong> Deník</span>
+      <small>neoficiální fanouškovský web</small>
+    </div>
+    <nav class="mainnav">
+      <a href="index.html">Domů</a>
+      <a href="reportaze.html">Reportáže</a>
+      <a href="tabulka.html">Tabulka</a>
+      <a href="archiv.html">Archiv</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Sezóna 2026/27 začíná</p>
+    <h1>Zelená a černá.<br>Zápas za zápasem.</h1>
+    <p class="lede">Dynamo Deník sleduje SK Dynamo České Budějovice tam, kde klub momentálně chybí — reportáže, ohlasy fanoušků a aktuální tabulka na jednom místě.</p>
+  </div>
+</section>
+
+<div class="wrap">
+
+  <div class="section-head">
+    <h2>Nejbližší zápas</h2>
+  </div>
+  <div id="next-match"><div class="empty">Načítám…</div></div>
+
+  <div class="section-head">
+    <h2>Poslední reportáž</h2>
+    <a class="see-all" href="reportaze.html">Všechny reportáže →</a>
+  </div>
+  <div id="latest-report"><div class="empty">Načítám…</div></div>
+
+</div>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p class="disclaimer">Dynamo Deník je neoficiální fanouškovský projekt a nemá žádnou vazbu na vedení klubu SK Dynamo České Budějovice. Klubové logo ani oficiální materiály zde nejsou použity.</p>
+  </div>
+</footer>
+
+<script src="assets/site.js"></script>
+<script>
+(async function () {
+  const matches = await loadJSON("matches.json");
+  const nextEl = document.getElementById("next-match");
+  if (matches && matches.length) {
+    const upcoming = matches
+      .filter(m => new Date(m.date) >= new Date(new Date().toDateString()))
+      .sort((a, b) => new Date(a.date) - new Date(b.date))[0];
+    if (upcoming) {
+      const home = upcoming.homeAway === "away" ? upcoming.opponent : "Dynamo ČB";
+      const away = upcoming.homeAway === "away" ? "Dynamo ČB" : upcoming.opponent;
+      nextEl.innerHTML = `
+        <div class="protocol">
+          <div class="protocol-top"><span>${escapeHTML(upcoming.kolo || "")}</span><span>${fmtDate(upcoming.date)} · ${escapeHTML(upcoming.time || "")}</span></div>
+          <div class="protocol-score">
+            <div class="team away">${escapeHTML(away)}</div>
+            <div class="score">vs</div>
+            <div class="team home">${escapeHTML(home)}</div>
+          </div>
+          <div class="protocol-meta"><span>Stadion: ${escapeHTML(upcoming.stadium || "—")}</span></div>
+        </div>`;
+    } else {
+      nextEl.innerHTML = `<div class="empty">Žádný nadcházející zápas v rozpisu — doplň ho přes admin.html.</div>`;
+    }
+  } else {
+    nextEl.innerHTML = `<div class="empty">Rozpis zápasů zatím není vyplněný.</div>`;
+  }
+
+  const reports = await loadJSON("reports.json");
+  const latestEl = document.getElementById("latest-report");
+  if (reports && reports.length) {
+    const latest = [...reports].sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+    latestEl.innerHTML = `<div class="card-grid">${reportCardHTML(latest)}</div>`;
+  } else {
+    latestEl.innerHTML = `<div class="empty">Zatím žádná reportáž — přidej ji přes admin.html.</div>`;
+  }
+})();
+</script>
+</body>
+</html>

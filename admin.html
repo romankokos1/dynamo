@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin — Dynamo Deník</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Source+Serif+4:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .tabs{ display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap; }
+  .tabs button{
+    font-family:var(--f-display); text-transform:uppercase; letter-spacing:.05em;
+    background:var(--black-2); color:var(--paper-dim); border:1px solid var(--line);
+    padding:9px 16px; border-radius:2px; cursor:pointer; font-size:.82rem;
+  }
+  .tabs button.active{ background:var(--green-brt); color:var(--black); border-color:var(--green-brt); }
+  .pane{ display:none; } .pane.active{ display:block; }
+  .item{
+    border:1px solid var(--line); background:var(--black-2); border-radius:2px;
+    padding:16px; margin-bottom:14px;
+  }
+  .item-top{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .item-top strong{ font-family:var(--f-display); color:var(--paper); }
+  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .row3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+  @media (max-width:640px){ .row2, .row3{ grid-template-columns:1fr; } }
+  .toolbar{ display:flex; gap:10px; margin:18px 0 30px; flex-wrap:wrap; }
+  .note{ font-family:var(--f-mono); font-size:.78rem; color:var(--paper-dim); margin:6px 0 20px; }
+  .status{ font-family:var(--f-mono); font-size:.78rem; color:var(--green-brt); min-height:1.2em; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <div class="brand">
+      <span><strong>Dynamo</strong> Deník</span>
+      <small>admin — pouze pro editaci</small>
+    </div>
+    <nav class="mainnav">
+      <a href="index.html">Zpět na web</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap" style="padding-top:30px;">
+  <p class="note">
+    Editace se ukládá jen v tomto prohlížeči (localStorage). Až budeš s obsahem spokojen/á,
+    klikni na <strong>„Stáhnout JSON"</strong> u dané sekce a nahraď stažený soubor v <code>/data/</code>
+    ve svém repozitáři (commit + push). Stránka samotná pak čte jen soubory z <code>/data/</code>,
+    ne tuto lokální editaci.
+  </p>
+
+  <div class="tabs">
+    <button data-tab="reports" class="active">Reportáže</button>
+    <button data-tab="matches">Rozpis zápasů</button>
+    <button data-tab="table">Tabulka</button>
+  </div>
+
+  <!-- REPORTS -->
+  <div class="pane active" id="pane-reports">
+    <div class="toolbar">
+      <button class="btn" onclick="addReport()">+ Nová reportáž</button>
+      <button class="btn secondary" onclick="downloadJSON('reports.json', reportsData)">Stáhnout JSON</button>
+      <button class="btn secondary" onclick="loadFromFile('reports')">Načíst soubor…</button>
+    </div>
+    <div id="reports-list"></div>
+  </div>
+
+  <!-- MATCHES -->
+  <div class="pane" id="pane-matches">
+    <div class="toolbar">
+      <button class="btn" onclick="addMatch()">+ Nový zápas</button>
+      <button class="btn secondary" onclick="downloadJSON('matches.json', matchesData)">Stáhnout JSON</button>
+      <button class="btn secondary" onclick="loadFromFile('matches')">Načíst soubor…</button>
+    </div>
+    <div id="matches-list"></div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="pane" id="pane-table">
+    <div class="field" style="max-width:520px;">
+      <label>Název soutěže</label>
+      <input id="table-competition" oninput="tableData.competition = this.value; saveDraft();">
+    </div>
+    <div class="field" style="max-width:520px;">
+      <label>Název tvého klubu (pro zvýraznění v tabulce)</label>
+      <input id="table-clubname" oninput="tableData.clubName = this.value; saveDraft();">
+    </div>
+    <div class="toolbar">
+      <button class="btn" onclick="addTableRow()">+ Řádek tabulky</button>
+      <button class="btn secondary" onclick="downloadJSON('table.json', tableData)">Stáhnout JSON</button>
+      <button class="btn secondary" onclick="loadFromFile('table')">Načíst soubor…</button>
+    </div>
+    <div id="table-list"></div>
+  </div>
+
+  <p class="status" id="status"></p>
+</div>
+
+<input type="file" id="file-input" accept="application/json" style="display:none">
+
+<script src="assets/site.js"></script>
+<script>
+let reportsData = [];
+let matchesData = [];
+let tableData = { competition: "", updated: "", clubName: "", rows: [] };
+
+const DRAFT_KEY = "dynamocb_admin_draft_v1";
+
+function saveDraft() {
+  localStorage.setItem(DRAFT_KEY, JSON.stringify({ reportsData, matchesData, tableData }));
+  const s = document.getElementById("status");
+  s.textContent = "Uloženo do prohlížeče (koncept) — " + new Date().toLocaleTimeString("cs-CZ");
+}
+
+function downloadJSON(filename, data) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+
+let loadTarget = null;
+function loadFromFile(target) {
+  loadTarget = target;
+  document.getElementById("file-input").click();
+}
+document.getElementById("file-input").addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const text = await file.text();
+  try {
+    const parsed = JSON.parse(text);
+    if (loadTarget === "reports") reportsData = parsed;
+    if (loadTarget === "matches") matchesData = parsed;
+    if (loadTarget === "table") tableData = parsed;
+    saveDraft(); renderAll();
+  } catch (err) {
+    alert("Soubor se nepodařilo přečíst jako JSON: " + err.message);
+  }
+  e.target.value = "";
+});
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+// ---- Reports ----
+function addReport() {
+  reportsData.unshift({
+    id: uid(), kolo: "", date: new Date().toISOString().slice(0,10),
+    opponent: "", homeAway: "home", score: "", scorers: "",
+    stadium: "Střelecký ostrov", attendance: "", perex: "", body: [""]
+  });
+  saveDraft(); renderReports();
+}
+function removeReport(i) { if (confirm("Smazat tuto reportáž?")) { reportsData.splice(i,1); saveDraft(); renderReports(); } }
+function renderReports() {
+  const el = document.getElementById("reports-list");
+  if (!reportsData.length) { el.innerHTML = `<div class="empty">Zatím žádné reportáže.</div>`; return; }
+  el.innerHTML = reportsData.map((r, i) => `
+    <div class="item">
+      <div class="item-top"><strong>${escapeHTML(r.opponent || "(bez soupeře)")} — ${escapeHTML(r.score||"")}</strong>
+        <button class="btn danger" onclick="removeReport(${i})">Smazat</button></div>
+      <div class="row3">
+        <div class="field"><label>Kolo</label><input value="${escapeHTML(r.kolo)}" oninput="reportsData[${i}].kolo=this.value;saveDraft();"></div>
+        <div class="field"><label>Datum</label><input type="date" value="${escapeHTML(r.date)}" oninput="reportsData[${i}].date=this.value;saveDraft();"></div>
+        <div class="field"><label>Doma / venku</label>
+          <select onchange="reportsData[${i}].homeAway=this.value;saveDraft();">
+            <option value="home" ${r.homeAway==="home"?"selected":""}>Doma</option>
+            <option value="away" ${r.homeAway==="away"?"selected":""}>Venku</option>
+          </select>
+        </div>
+      </div>
+      <div class="row3">
+        <div class="field"><label>Soupeř</label><input value="${escapeHTML(r.opponent)}" oninput="reportsData[${i}].opponent=this.value;saveDraft();"></div>
+        <div class="field"><label>Výsledek</label><input placeholder="2:1" value="${escapeHTML(r.score)}" oninput="reportsData[${i}].score=this.value;saveDraft();"></div>
+        <div class="field"><label>Diváci</label><input value="${escapeHTML(r.attendance)}" oninput="reportsData[${i}].attendance=this.value;saveDraft();"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Stadion</label><input value="${escapeHTML(r.stadium)}" oninput="reportsData[${i}].stadium=this.value;saveDraft();"></div>
+        <div class="field"><label>Střelci</label><input value="${escapeHTML(r.scorers)}" oninput="reportsData[${i}].scorers=this.value;saveDraft();"></div>
+      </div>
+      <div class="field"><label>Perex (krátký úvod na kartě)</label><input value="${escapeHTML(r.perex)}" oninput="reportsData[${i}].perex=this.value;saveDraft();"></div>
+      <div class="field"><label>Text reportáže (každý odstavec na nový řádek)</label>
+        <textarea oninput="reportsData[${i}].body=this.value.split('\\n').filter(Boolean);saveDraft();">${escapeHTML((r.body||[]).join("\n"))}</textarea>
+      </div>
+    </div>`).join("");
+}
+
+// ---- Matches ----
+function addMatch() {
+  matchesData.push({ kolo:"", date:new Date().toISOString().slice(0,10), opponent:"", homeAway:"home", stadium:"Střelecký ostrov", time:"17:00" });
+  saveDraft(); renderMatches();
+}
+function removeMatch(i) { if (confirm("Smazat tento zápas?")) { matchesData.splice(i,1); saveDraft(); renderMatches(); } }
+function renderMatches() {
+  const el = document.getElementById("matches-list");
+  if (!matchesData.length) { el.innerHTML = `<div class="empty">Zatím žádné zápasy v rozpisu.</div>`; return; }
+  el.innerHTML = matchesData.map((m,i) => `
+    <div class="item">
+      <div class="item-top"><strong>${escapeHTML(m.opponent||"(bez soupeře)")}</strong>
+        <button class="btn danger" onclick="removeMatch(${i})">Smazat</button></div>
+      <div class="row3">
+        <div class="field"><label>Kolo</label><input value="${escapeHTML(m.kolo)}" oninput="matchesData[${i}].kolo=this.value;saveDraft();"></div>
+        <div class="field"><label>Datum</label><input type="date" value="${escapeHTML(m.date)}" oninput="matchesData[${i}].date=this.value;saveDraft();"></div>
+        <div class="field"><label>Čas</label><input value="${escapeHTML(m.time)}" oninput="matchesData[${i}].time=this.value;saveDraft();"></div>
+      </div>
+      <div class="row3">
+        <div class="field"><label>Soupeř</label><input value="${escapeHTML(m.opponent)}" oninput="matchesData[${i}].opponent=this.value;saveDraft();"></div>
+        <div class="field"><label>Doma / venku</label>
+          <select onchange="matchesData[${i}].homeAway=this.value;saveDraft();">
+            <option value="home" ${m.homeAway==="home"?"selected":""}>Doma</option>
+            <option value="away" ${m.homeAway==="away"?"selected":""}>Venku</option>
+          </select>
+        </div>
+        <div class="field"><label>Stadion</label><input value="${escapeHTML(m.stadium)}" oninput="matchesData[${i}].stadium=this.value;saveDraft();"></div>
+      </div>
+    </div>`).join("");
+}
+
+// ---- Table ----
+function addTableRow() {
+  tableData.rows.push({ team:"", p:0, w:0, d:0, l:0, gf:0, ga:0, pts:0 });
+  saveDraft(); renderTable();
+}
+function removeTableRow(i) { tableData.rows.splice(i,1); saveDraft(); renderTable(); }
+function renderTable() {
+  document.getElementById("table-competition").value = tableData.competition || "";
+  document.getElementById("table-clubname").value = tableData.clubName || "";
+  const el = document.getElementById("table-list");
+  if (!tableData.rows.length) { el.innerHTML = `<div class="empty">Zatím žádné řádky.</div>`; return; }
+  el.innerHTML = tableData.rows.map((t,i) => `
+    <div class="item">
+      <div class="item-top"><strong>${escapeHTML(t.team || "(bez názvu)")}</strong>
+        <button class="btn danger" onclick="removeTableRow(${i})">Smazat</button></div>
+      <div class="row3">
+        <div class="field"><label>Klub</label><input value="${escapeHTML(t.team)}" oninput="tableData.rows[${i}].team=this.value;saveDraft();"></div>
+        <div class="field"><label>Zápasy</label><input type="number" value="${t.p}" oninput="tableData.rows[${i}].p=+this.value;saveDraft();"></div>
+        <div class="field"><label>Body</label><input type="number" value="${t.pts}" oninput="tableData.rows[${i}].pts=+this.value;saveDraft();"></div>
+      </div>
+      <div class="row3">
+        <div class="field"><label>Výhry</label><input type="number" value="${t.w}" oninput="tableData.rows[${i}].w=+this.value;saveDraft();"></div>
+        <div class="field"><label>Remízy</label><input type="number" value="${t.d}" oninput="tableData.rows[${i}].d=+this.value;saveDraft();"></div>
+        <div class="field"><label>Prohry</label><input type="number" value="${t.l}" oninput="tableData.rows[${i}].l=+this.value;saveDraft();"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Vstřelené góly</label><input type="number" value="${t.gf}" oninput="tableData.rows[${i}].gf=+this.value;saveDraft();"></div>
+        <div class="field"><label>Obdržené góly</label><input type="number" value="${t.ga}" oninput="tableData.rows[${i}].ga=+this.value;saveDraft();"></div>
+      </div>
+    </div>`).join("");
+}
+
+function renderAll() { renderReports(); renderMatches(); renderTable(); }
+
+// ---- Tabs ----
+document.querySelectorAll(".tabs button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tabs button").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".pane").forEach(p => p.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("pane-" + btn.dataset.tab).classList.add("active");
+  });
+});
+
+// ---- Init: load draft from localStorage, else fetch current /data/*.json ----
+(async function init() {
+  const draft = localStorage.getItem(DRAFT_KEY);
+  if (draft) {
+    try {
+      const parsed = JSON.parse(draft);
+      reportsData = parsed.reportsData || [];
+      matchesData = parsed.matchesData || [];
+      tableData = parsed.tableData || tableData;
+      document.getElementById("status").textContent = "Načten uložený koncept z tohoto prohlížeče.";
+    } catch (e) {}
+  } else {
+    reportsData = await loadJSON("reports.json") || [];
+    matchesData = await loadJSON("matches.json") || [];
+    tableData = await loadJSON("table.json") || tableData;
+  }
+  renderAll();
+})();
+</script>
+</body>
+</html>
