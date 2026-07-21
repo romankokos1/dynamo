@@ -11,23 +11,23 @@
   .tabs{ display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap; }
   .tabs button{
     font-family:var(--f-display); text-transform:uppercase; letter-spacing:.05em;
-    background:var(--black-2); color:var(--paper-dim); border:1px solid var(--line);
-    padding:9px 16px; border-radius:2px; cursor:pointer; font-size:.82rem;
+    background:var(--paper); color:var(--ink-soft); border:1px solid var(--ink);
+    padding:9px 16px; border-radius:0; cursor:pointer; font-size:.82rem;
   }
-  .tabs button.active{ background:var(--green-brt); color:var(--black); border-color:var(--green-brt); }
+  .tabs button.active{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
   .pane{ display:none; } .pane.active{ display:block; }
   .item{
-    border:1px solid var(--line); background:var(--black-2); border-radius:2px;
+    border:1px solid var(--line); background:var(--paper-2); border-radius:0;
     padding:16px; margin-bottom:14px;
   }
   .item-top{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
-  .item-top strong{ font-family:var(--f-display); color:var(--paper); }
+  .item-top strong{ font-family:var(--f-display); color:var(--ink); }
   .row2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
   .row3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
   @media (max-width:640px){ .row2, .row3{ grid-template-columns:1fr; } }
   .toolbar{ display:flex; gap:10px; margin:18px 0 30px; flex-wrap:wrap; }
-  .note{ font-family:var(--f-mono); font-size:.78rem; color:var(--paper-dim); margin:6px 0 20px; }
-  .status{ font-family:var(--f-mono); font-size:.78rem; color:var(--green-brt); min-height:1.2em; }
+  .note{ font-family:var(--f-mono); font-size:.78rem; color:var(--ink-soft); margin:6px 0 20px; }
+  .status{ font-family:var(--f-mono); font-size:.78rem; color:var(--ink-soft); min-height:1.2em; }
 </style>
 </head>
 <body>

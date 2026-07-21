@@ -1,22 +1,7 @@
 [
   {
-    "id": "mrus4wq98uc9",
-    "kolo": "3. kolo",
-    "date": "2026-07-21",
-    "opponent": "ADMIRA",
-    "homeAway": "home",
-    "score": "1:1",
-    "scorers": "Skalák",
-    "stadium": "Střelecký ostrov",
-    "attendance": "6000",
-    "perex": "Skalák zařídil bod.",
-    "body": [
-      "TEST"
-    ]
-  },
-  {
     "id": "2026-08-01-priklad",
-    "kolo": "2. kolo",
+    "kolo": "1. kolo",
     "date": "2026-08-01",
     "opponent": "Ukázkový soupeř",
     "homeAway": "home",
@@ -28,8 +13,7 @@
     "body": [
       "Sem patří první odstavec reportáže — atmosféra, rozehřívací kolo, co bylo v sázce.",
       "Druhý odstavec: průběh zápasu, klíčové momenty, branky.",
-      "Třetí odstavec: shrnutí, co zápas znamenal pro tabulku a co bude dál.",
-      "KONEC"
+      "Třetí odstavec: shrnutí, co zápas znamenal pro tabulku a co bude dál."
     ]
   }
 ]

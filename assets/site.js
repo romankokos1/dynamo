@@ -30,13 +30,16 @@ function escapeHTML(s) {
 
 function reportCardHTML(r) {
   const hd = r.homeAway === "away" ? "venku" : "doma";
+  const koloNum = (r.kolo || "").match(/\d+/);
   return `
     <a class="card" href="reportaze.html?id=${encodeURIComponent(r.id)}">
-      <div class="kolo">${escapeHTML(r.kolo || "")} · ${hd}</div>
-      <h3>Dynamo ${r.homeAway === "away" ? "–" : "vs"} ${escapeHTML(r.opponent || "")}</h3>
-      <div class="score-line">${escapeHTML(r.score || "—:—")}</div>
-      <p>${escapeHTML(r.perex || "")}</p>
-      <div class="date">${fmtDate(r.date)} · ${escapeHTML(r.stadium || "")}</div>
+      <div class="kolo">${koloNum ? koloNum[0] : "—"}</div>
+      <div class="card-body">
+        <h3>Dynamo ${r.homeAway === "away" ? "–" : "vs"} ${escapeHTML(r.opponent || "")}</h3>
+        <div class="score-line">${escapeHTML(r.score || "—:—")} · ${hd}</div>
+        <p>${escapeHTML(r.perex || "")}</p>
+      </div>
+      <div class="date">${fmtDate(r.date)}<br>${escapeHTML(r.stadium || "")}</div>
     </a>`;
 }
 
