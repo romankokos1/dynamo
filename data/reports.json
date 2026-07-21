@@ -1,0 +1,19 @@
+[
+  {
+    "id": "2026-08-01-priklad",
+    "kolo": "1. kolo",
+    "date": "2026-08-01",
+    "opponent": "Ukázkový soupeř",
+    "homeAway": "home",
+    "score": "2:1",
+    "scorers": "Novák 23', Svoboda 67' — Vzorek 81'",
+    "stadium": "Střelecký ostrov",
+    "attendance": "1 850",
+    "perex": "Toto je ukázková reportáž. Uprav nebo smaž ji přes admin.html a nahraď skutečným zápasem.",
+    "body": [
+      "Sem patří první odstavec reportáže — atmosféra, rozehřívací kolo, co bylo v sázce.",
+      "Druhý odstavec: průběh zápasu, klíčové momenty, branky.",
+      "Třetí odstavec: shrnutí, co zápas znamenal pro tabulku a co bude dál."
+    ]
+  }
+]

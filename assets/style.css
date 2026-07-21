@@ -1,0 +1,218 @@
+/* ==========================================================================
+   Dynamo ČB fanouškovský web — sdílené styly
+   Neoficiální projekt. Klubové barvy: zelená (#173c28) a černá.
+   ========================================================================== */
+
+:root{
+  --black:      #0c100e;
+  --black-2:    #121712;
+  --green-deep: #10331f;
+  --green:      #1d5c37;
+  --green-brt:  #4caf72;
+  --green-line: #274a34;
+  --paper:      #eef1ea;
+  --paper-dim:  #b7c2b8;
+  --line:       #26302a;
+  --gold:       #c9a24a; /* velmi střídmě — jen pro skóre/výsledky */
+
+  --f-display: "Oswald", "Arial Narrow", sans-serif;
+  --f-body:    "Source Serif 4", Georgia, serif;
+  --f-mono:    "IBM Plex Mono", ui-monospace, monospace;
+
+  --maxw: 1080px;
+}
+
+*{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+
+body{
+  margin:0;
+  background:
+    radial-gradient(1200px 600px at 15% -10%, rgba(29,92,55,.35), transparent 60%),
+    var(--black);
+  color:var(--paper);
+  font-family:var(--f-body);
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+
+a{ color:var(--green-brt); text-decoration:none; }
+a:hover{ text-decoration:underline; }
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible{
+  outline:2px solid var(--green-brt); outline-offset:2px;
+}
+
+.wrap{ max-width:var(--maxw); margin:0 auto; padding:0 20px; }
+
+/* ---- Header / nav ---- */
+.site-header{
+  border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg, var(--green-deep), var(--black-2) 140%);
+  position:sticky; top:0; z-index:10;
+}
+.site-header .wrap{
+  display:flex; align-items:center; justify-content:space-between;
+  padding-top:14px; padding-bottom:14px; gap:16px; flex-wrap:wrap;
+}
+.brand{
+  font-family:var(--f-display);
+  font-weight:700;
+  letter-spacing:.04em;
+  font-size:1.35rem;
+  color:var(--paper);
+  display:flex; flex-direction:column; line-height:1.1;
+}
+.brand small{
+  font-family:var(--f-mono);
+  font-weight:400;
+  font-size:.62rem;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--paper-dim);
+  margin-top:3px;
+}
+.brand strong{ color:var(--green-brt); }
+
+nav.mainnav{ display:flex; gap:4px; flex-wrap:wrap; }
+nav.mainnav a{
+  font-family:var(--f-display);
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  font-size:.85rem;
+  color:var(--paper-dim);
+  padding:8px 12px;
+  border-radius:3px;
+  transition:background .15s, color .15s;
+}
+nav.mainnav a:hover{ background:rgba(76,175,114,.12); color:var(--paper); text-decoration:none; }
+nav.mainnav a.active{ color:var(--black); background:var(--green-brt); }
+
+/* ---- Hero ---- */
+.hero{
+  border-bottom:1px solid var(--line);
+  padding:56px 0 44px;
+}
+.hero .eyebrow{
+  font-family:var(--f-mono); font-size:.72rem; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--green-brt); margin:0 0 10px;
+}
+.hero h1{
+  font-family:var(--f-display); font-weight:700; letter-spacing:.01em;
+  font-size:clamp(2rem, 5vw, 3.4rem); margin:0 0 14px; color:var(--paper);
+}
+.hero p.lede{ color:var(--paper-dim); max-width:60ch; font-size:1.08rem; }
+
+/* ---- Section headers ---- */
+.section-head{
+  display:flex; align-items:baseline; justify-content:space-between;
+  gap:16px; margin:52px 0 20px; border-bottom:1px solid var(--line); padding-bottom:10px;
+}
+.section-head h2{
+  font-family:var(--f-display); text-transform:uppercase; letter-spacing:.05em;
+  font-size:1.15rem; margin:0; color:var(--paper);
+}
+.section-head .see-all{ font-family:var(--f-mono); font-size:.78rem; white-space:nowrap; }
+
+/* ---- Match protocol block (signature element) ---- */
+.protocol{
+  border:1px solid var(--green-line);
+  background:var(--black-2);
+  border-radius:2px;
+  overflow:hidden;
+}
+.protocol-top{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:10px 16px;
+  background:var(--green-deep);
+  font-family:var(--f-mono); font-size:.72rem; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--paper-dim);
+  border-bottom:1px solid var(--green-line);
+}
+.protocol-score{
+  display:grid; grid-template-columns:1fr auto 1fr;
+  align-items:center; gap:18px; padding:22px 20px 16px; text-align:center;
+}
+.protocol-score .team{ font-family:var(--f-display); font-size:1.15rem; color:var(--paper); }
+.protocol-score .team.away{ text-align:left; }
+.protocol-score .team.home{ text-align:right; }
+.protocol-score .score{
+  font-family:var(--f-display); font-size:2.6rem; color:var(--gold);
+  letter-spacing:.02em; white-space:nowrap;
+}
+.protocol-meta{
+  display:flex; gap:18px; flex-wrap:wrap; justify-content:center;
+  padding:0 20px 18px; font-family:var(--f-mono); font-size:.72rem;
+  color:var(--paper-dim); text-transform:uppercase; letter-spacing:.06em;
+}
+
+/* ---- Report cards ---- */
+.card-grid{ display:grid; gap:18px; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); }
+.card{
+  border:1px solid var(--line); background:var(--black-2);
+  border-radius:2px; padding:18px; display:flex; flex-direction:column; gap:10px;
+  transition:border-color .15s, transform .15s;
+}
+.card:hover{ border-color:var(--green-line); transform:translateY(-2px); }
+.card .kolo{ font-family:var(--f-mono); font-size:.7rem; letter-spacing:.1em; color:var(--green-brt); text-transform:uppercase; }
+.card h3{ font-family:var(--f-display); font-size:1.15rem; margin:0; color:var(--paper); line-height:1.25; }
+.card .score-line{ font-family:var(--f-mono); font-size:.95rem; color:var(--gold); }
+.card p{ color:var(--paper-dim); font-size:.92rem; margin:0; }
+.card .date{ font-family:var(--f-mono); font-size:.7rem; color:var(--paper-dim); margin-top:auto; }
+
+/* ---- Report detail (article) ---- */
+.report-article{ margin-top:18px; }
+.report-article .body p{ font-size:1.05rem; color:var(--paper); }
+.report-article .body p:first-of-type::first-letter{
+  font-family:var(--f-display); font-size:2.8rem; float:left; line-height:.85;
+  padding:4px 8px 0 0; color:var(--green-brt);
+}
+
+/* ---- Table ---- */
+table.leaguetable{
+  width:100%; border-collapse:collapse; font-family:var(--f-mono); font-size:.86rem;
+}
+table.leaguetable th, table.leaguetable td{
+  padding:9px 10px; text-align:left; border-bottom:1px solid var(--line);
+}
+table.leaguetable th{
+  text-transform:uppercase; letter-spacing:.06em; font-size:.68rem;
+  color:var(--paper-dim); font-weight:400; border-bottom:1px solid var(--green-line);
+}
+table.leaguetable td.num, table.leaguetable th.num{ text-align:center; }
+table.leaguetable tr.club-row td:first-child, table.leaguetable tr.club-row td.team{ color:var(--green-brt); }
+table.leaguetable tr.club-row{ background:rgba(76,175,114,.07); }
+table.leaguetable td.pts{ font-weight:700; color:var(--paper); }
+
+/* ---- Forms (admin) ---- */
+.field{ margin-bottom:14px; display:flex; flex-direction:column; gap:6px; }
+.field label{ font-family:var(--f-mono); font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; color:var(--paper-dim); }
+.field input, .field textarea, .field select{
+  background:var(--black-2); border:1px solid var(--line); color:var(--paper);
+  padding:9px 10px; font-family:var(--f-body); font-size:.95rem; border-radius:2px;
+}
+.field textarea{ min-height:140px; resize:vertical; font-family:var(--f-body); }
+.btn{
+  font-family:var(--f-display); text-transform:uppercase; letter-spacing:.06em;
+  background:var(--green-brt); color:var(--black); border:none; padding:10px 18px;
+  border-radius:2px; cursor:pointer; font-size:.85rem;
+}
+.btn:hover{ background:#63c98b; }
+.btn.secondary{ background:transparent; color:var(--paper); border:1px solid var(--line); }
+.btn.danger{ background:#7a2f2f; color:var(--paper); }
+
+/* ---- Footer ---- */
+.site-footer{
+  margin-top:70px; border-top:1px solid var(--line);
+  padding:26px 0 50px; color:var(--paper-dim); font-size:.8rem;
+}
+.site-footer .disclaimer{ max-width:70ch; }
+
+.empty{
+  border:1px dashed var(--line); border-radius:2px; padding:26px;
+  color:var(--paper-dim); font-family:var(--f-mono); font-size:.85rem; text-align:center;
+}
+
+@media (max-width:640px){
+  .protocol-score{ grid-template-columns:1fr; text-align:center; }
+  .protocol-score .team.away, .protocol-score .team.home{ text-align:center; }
+}
